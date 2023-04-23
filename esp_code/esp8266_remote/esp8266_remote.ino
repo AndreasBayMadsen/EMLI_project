@@ -1,9 +1,8 @@
 // Embedded Linux (EMLI)
 // University of Southern Denmark
-// ESP8266 Wifi client - Webserver - User interface 
-// Kjeld Jensen <kjen@sdu.dk> <kj@kjen.dk>
-// 2023-04-18, KJ, First version
-// inspired by https://docs.arduino.cc/tutorials/uno-wifi-rev2/uno-wifi-r2-hosting-a-webserver
+// ESP8266 Wifi client - MQTT - Remote For Watering Apperatus
+// Magnus Ellehøj Jacobsen <majac18@student.sdu.dk>
+// 23-04-23
 
 // LED
 #define PIN_LED_RED     14
@@ -13,157 +12,129 @@
 // button
 #define PIN_BUTTON      4
 #define DEBOUNCE_TIME 200 // milliseconds
-volatile int button_a_count;
-volatile unsigned long count_prev_time;
+volatile unsigned long countPrevTime;
+volatile boolean buttonPressed;
 
 // Wifi
 #include <ESP8266WiFi.h>
 const char* WIFI_SSID = "EMLI_TEAM_12";
 const char* WIFI_PASSWORD = "raspberry";
 
-// Static IP address
-IPAddress IPaddress(10, 42, 0, 2);
-IPAddress gateway(10, 42, 0, 1);
-IPAddress subnet(255, 255, 255, 0);
-//IPAddress primaryDNS(1, 1, 1, 1); 
-//IPAddress secondaryDNS(8, 8, 8, 8); 
+// MQTT Setup
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
+#define MQTT_SERVER      "io.adafruit.com"
+#define MQTT_SERVERPORT  1883                   // use 8883 for SSL
+#define MQTT_USERNAME    "...your AIO username (see https://accounts.adafruit.com)..."
+#define MQTT_KEY         "...your AIO key..."
 
-// Webserver
-#define CLIENT_TIMEOUT 2000
+WiFiClient client;
+Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, MQTT_KEY);
+Adafruit_MQTT_Subscribe clientNumber = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME "/plant/nextClient");
+Adafruit_MQTT_Publish clientACK = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME "/plant/clientACK");
+void MQTT_connect();
 
-WiFiServer server(80);
-WiFiClient client = server.available();
-unsigned long clientConnectTime = 0;
-String currentLine = "";
-char response_s[10];
-char s[25];
+//Plant System Setup
+int plantNumber;
 
-ICACHE_RAM_ATTR void button_a_isr()
+ICACHE_RAM_ATTR void buttonIsr()
 {
-  if (millis() - count_prev_time > DEBOUNCE_TIME)
+  if (millis() - countPrevTime > DEBOUNCE_TIME)
   {
-    count_prev_time = millis();
-    button_a_count++;
+    countPrevTime = millis();
+    buttonPressed = true;
   }
 }
 
-void setup()
-{
-  // serial
+void setup(){
   Serial.begin(115200);
   delay(10);
-
-  // LEDs
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-  pinMode(PIN_LED_RED, OUTPUT);
-  digitalWrite(PIN_LED_RED, LOW);
-  pinMode(PIN_LED_YELLOW, OUTPUT);
-  digitalWrite(PIN_LED_YELLOW, LOW);
-  pinMode(PIN_LED_GREEN, OUTPUT);
-  digitalWrite(PIN_LED_GREEN, LOW);
-
-  // button
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), button_a_isr, RISING);
-
-  // set the ESP8266 to be a WiFi-client
-  WiFi.mode(WIFI_STA); 
   
-  // configure static IP address
-  WiFi.config(IPaddress, gateway, subnet);
-  //WiFi.config(IPaddress, gateway, subnet, primaryDNS, secondaryDNS);
-
-  // connect to Wifi access point
+  Serial.println(F("Plant Watering Remote - Monitoring and Triggering."));
+  Serial.println(F("========================================================="));
   Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(WIFI_SSID);
 
+
+  //Setup WiFi
+  Serial.println(F("Connecting to WiFi"));
+  Serial.println(F("---------------------------------------------------------"));
+  Serial.print(F("Connecting to "));
+  Serial.print(WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  int i = 0;
+  while (WiFi.status() != WL_CONNECTED) {
+    i++;
     delay(500);
     Serial.print(".");
+    if(i==30) break;
   }
-  digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.println("");
+  if(WiFi.status() != WL_CONNECTED){
+    Serial.println(F("Failure"));
+    Serial.println(F("Error: Couldn't connect to specified WiFi"));
+    Serial.println(F("Restarting in 5s due to Error"));
+    delay(5000);
+    ESP.restart();
+  }else{
+    Serial.println(F("Success"));
+    Serial.println(F("WiFi Connected"));
+    Serial.print(F("IP: "));
+    Serial.println(WiFi.localIP());
+  }
 
-  // start webserver
-  Serial.println("Starting webserver");
-  Serial.println("");
-  server.begin();
+  //Register Plant
+  Serial.println();
+  Serial.println(F("Attempting to get plant registration number through MQTT"));
+  Serial.println(F("---------------------------------------------------------"));
+  Serial.print(F("Reading topic "));
+  Serial.println(clientNumber.topic);
+  mqtt.subscribe(&clientNumber);
+  Adafruit_MQTT_Subscribe *subscription;
+  while (subscription = mqtt.readSubscription(5000)) {
+    if (subscription == &clientNumber) {
+      if (! clientACK.publish("a")) {
+        Serial.println(F("Failed"));
+      } else {
+        Serial.println(F("OK!"));
+      }
+      Serial.print(F("Got: "));
+      Serial.println((char *)clientNumber.lastread);
+      plantNumber = int(clientNumber.lastread);
+      
+    } else {
+      Serial.println(F("Failure"));
+      Serial.println(F("Error: Failed to register planter in MQTT"));
+      Serial.println(F("Restarting in 5s due to Error"));
+      delay(5000);
+      ESP.restart();
+    }
+  }
+  
+  mqtt.unsubscribe(&clientNumber);
+  
+  
 }
 
 void loop()
 {
-  // test for newæ client
-  client = server.available();
-  if (client) {
-    Serial.println("New client");
-    currentLine = "";
-    clientConnectTime = millis();
-    while (client.connected() && millis() - clientConnectTime < CLIENT_TIMEOUT) {
-      if (client.available()) {
-        char c = client.read();
-        Serial.write(c);
+  MQTT_connect();
+}
 
-        if (c == '\n') {
-          // if the current line is blank, you got two newline characters in a row.
-          // that's the end of the client HTTP request, so send a response:
-          if (currentLine.length() == 0) {
-            Serial.println("Sending response");
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-type: text/html");
-            sprintf (s, "Content-Length: %d",strlen(response_s));
-            client.println(s);
-            client.println();
-            //client.println("Connection: close");
-            client.println(response_s);
-            client.println();
-            response_s[0] = 0;
-          } else {
 
-            if (currentLine.startsWith("GET /led/red/on")) {
-              Serial.println("Red LED on");
-              digitalWrite(PIN_LED_RED, HIGH);
-            } else if (currentLine.startsWith("GET /led/red/off")) {
-              Serial.println("Red LED off");
-              digitalWrite(PIN_LED_RED, LOW);
-    
-            } else if (currentLine.startsWith("GET /led/yellow/on")) {
-              Serial.println("Yellow LED on");
-              digitalWrite(PIN_LED_YELLOW, HIGH);
-            } else if (currentLine.startsWith("GET /led/yellow/off")) {
-              Serial.println("Yellow LED off");
-              digitalWrite(PIN_LED_YELLOW, LOW);
-    
-            } else if (currentLine.startsWith("GET /led/green/on")) {
-              Serial.println("Green LED on");
-              digitalWrite(PIN_LED_GREEN, HIGH);
-            } else if (currentLine.startsWith("GET /led/green/off")) {
-              Serial.println("Green LED off");
-              digitalWrite(PIN_LED_GREEN, LOW);
+void MQTT_connect() {
+  int8_t ret;
 
-            } else if (currentLine.startsWith("GET /button/a/count")) {
-              Serial.println("Return button count");
-              sprintf (response_s, "%d", button_a_count);
-              button_a_count = 0;
-            }        
-
-            currentLine = "";
-          }          
-        } else if (c != '\r') {
-          currentLine += c;          
-        }
-      }
-    }
-    client.stop();
-    Serial.println("Client disconnected.");
-    Serial.println("");
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
   }
+
+  Serial.print("Connecting to MQTT... ");
+
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+  }
+  Serial.println("MQTT Connected!");
 }

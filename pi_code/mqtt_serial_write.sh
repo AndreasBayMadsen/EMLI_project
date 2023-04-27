@@ -4,7 +4,7 @@
 # messages for communication with the PICO.
 #
 # The relevant MQTT topics:
-#   - control/pump    			(PI --> PICO)
+#   - control/pump    		(PI --> PICO)
 #***********************************************
 instance=$1
 #let lastPump=$(date +%s)-5000

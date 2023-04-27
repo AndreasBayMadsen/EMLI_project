@@ -8,6 +8,7 @@
 #
 # The relevant MQTT topcis:
 #   - button    (PI <-- ESP)
+#   - pump
 #***********************************************
 
 # Extract command line arguments

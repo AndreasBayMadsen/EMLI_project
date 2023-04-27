@@ -7,7 +7,6 @@
 #   - Base topic for the specific plant
 #
 # The relevant MQTT topcis:
-#   - button    (PI <-- ESP)
 #   - ledRed    (PI --> ESP)
 #   - ledYellow (PI --> ESP)
 #   - ledGreen  (PI --> ESP)
@@ -25,7 +24,7 @@ fi
 # Listen for 'PI --> ESP' messages
 while true
 do
-    mosquitto_sub -t "$base_topic/remote/ledRed" -t "$base_topic/remote/ledYellow" -t "$base_topic/remote/ledGreen" -F "%t %p" | while read -r payload
+    mosquitto_sub -t "plant/$base_topic/remote/ledRed" -t "plant/$base_topic/remote/ledYellow" -t "plant/$base_topic/remote/ledGreen" -F "%t %p" | while read -r payload
     do
         # Extract data from package
         topic=$(echo "$payload" | cut -d ' ' -f 1)

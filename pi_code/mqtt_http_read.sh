@@ -23,6 +23,6 @@ fi
 while true
 do
     button_presses=$(curl -s "http://10.42.0.2/button/a/count")
-    mosquitto_pub -t "$base_topic/remote/button" -m $button_presses
+    mosquitto_pub -t "plant/$base_topic/remote/button" -m $button_presses
     sleep 2
 done

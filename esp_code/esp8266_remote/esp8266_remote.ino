@@ -31,7 +31,8 @@ const char* WIFI_PASSWORD = "raspberry";
 WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, MQTT_SERVER, MQTT_SERVERPORT, MQTT_USERNAME, MQTT_KEY);
 Adafruit_MQTT_Subscribe clientNumber = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME "/plant/nextClient");
-Adafruit_MQTT_Publish clientACK = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME "/plant/clientACK");
+Adafruit_MQTT_Publish clientReg = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME "/plant/clientReg");
+
 void MQTT_connect();
 
 //Plant System Setup
@@ -49,6 +50,16 @@ ICACHE_RAM_ATTR void buttonIsr()
 void setup(){
   Serial.begin(115200);
   delay(10);
+
+  // LEDs
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(PIN_LED_RED, OUTPUT);
+  digitalWrite(PIN_LED_RED, LOW);
+  pinMode(PIN_LED_YELLOW, OUTPUT);
+  digitalWrite(PIN_LED_YELLOW, LOW);
+  pinMode(PIN_LED_GREEN, OUTPUT);
+  digitalWrite(PIN_LED_GREEN, LOW);
   
   Serial.println(F("Plant Watering Remote - Monitoring and Triggering."));
   Serial.println(F("========================================================="));
@@ -85,13 +96,23 @@ void setup(){
   Serial.println();
   Serial.println(F("Attempting to get plant registration number through MQTT"));
   Serial.println(F("---------------------------------------------------------"));
+  Serial.print(F("Requesting ID from MQTT server..."));
+  if (! clientACK.publish("ACK")) {
+        Serial.println(F("Failure"));
+        Serial.println(F("Error: Failed to send ID Request to MQTT"));
+        Serial.println(F("Restarting in 5s due to Error"));
+        delay(5000);
+        ESP.restart();
+      } else {
+        Serial.println(F("OK!"));
+      }
   Serial.print(F("Reading topic "));
   Serial.println(clientNumber.topic);
   mqtt.subscribe(&clientNumber);
   Adafruit_MQTT_Subscribe *subscription;
   while (subscription = mqtt.readSubscription(5000)) {
     if (subscription == &clientNumber) {
-      if (! clientACK.publish("a")) {
+      if (! clientACK.publish("ACK")) {
         Serial.println(F("Failed"));
       } else {
         Serial.println(F("OK!"));
@@ -108,15 +129,78 @@ void setup(){
       ESP.restart();
     }
   }
-  
+
+
   mqtt.unsubscribe(&clientNumber);
+
+  char[40] str;
+  sprintf(str, "plant/%i/remote/button", plantnumber)
+  Adafruit_MQTT_Publish buttonTopic = Adafruit_MQTT_Publish(&mqtt, MQTT_USERNAME str);
   
+  sprintf(str, "plant/%i/remote/led/red", plantnumber)
+  Adafruit_MQTT_Subscribe ledRed = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME str);
   
+  sprintf(str, "plant/%i/remote/led/yellow", plantnumber)
+  Adafruit_MQTT_Subscribe ledYellow = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME str);
+  
+  sprintf(str, "plant/%i/remote/led/green", plantnumber)
+  Adafruit_MQTT_Subscribe ledGreen = Adafruit_MQTT_Subscribe(&mqtt, MQTT_USERNAME str);
+  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop()
 {
   MQTT_connect();
+  
+  //Button Handler
+  if (buttonPressed){
+    Serial.print(F("Attempting to publish buttonpress..."))
+    if (! buttonTopic.publish(1)) {
+      Serial.println(F("Failed"));
+    } else {
+      Serial.println(F("Published! "));
+    }
+  }
+
+
+  //Read Subscriptions
+  Adafruit_MQTT_Subscribe *subscription;
+  while ((subscription = mqtt.readSubscription(2000))) {
+    if (subscription == &ledRed) {
+      Serial.print(F("Got Red LED: "));
+      Serial.println((char *)ledRed.lastread);
+      if (ledRed.lastread = ON){
+        digitalWrite(PIN_LED_RED, HIGH);
+      } else {
+        digitalWrite(PIN_LED_RED, LOW);  
+      }
+      
+    }
+    if (subscription == &ledYellow) {
+      Serial.print(F("Got Yellow LED: "));
+      Serial.println((char *)ledYellow.lastread);
+      if (ledRed.lastread = ON){
+        digitalWrite(PIN_LED_YELLOW, HIGH);
+      } else {
+        digitalWrite(PIN_LED_YELLOW, LOW);  
+      }
+    }
+    if (subscription == &ledGreen) {
+      Serial.print(F("Got Green LED: "));
+      Serial.println((char *)ledGreen.lastread);
+      if (ledRed.lastread = ON){
+        digitalWrite(PIN_LED_GREEN, HIGH);
+      } else {
+        digitalWrite(PIN_LED_GREEN, LOW);  
+      }
+    }
+  }
+  
+  
+  
+  delay(1000);
+  
+  
 }
 
 

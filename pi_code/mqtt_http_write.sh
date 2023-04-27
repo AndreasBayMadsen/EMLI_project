@@ -24,7 +24,7 @@ fi
 # Listen for 'PI --> ESP' messages
 while true
 do
-    mosquitto_sub -t "plant/$base_topic/remote/ledRed" -t "plant/$base_topic/remote/ledYellow" -t "plant/$base_topic/remote/ledGreen" -F "%t %p" | while read -r payload
+    mosquitto_sub -t "plant/$base_topic/remote/led/red" -t "plant/$base_topic/remote/led/yellow" -t "plant/$base_topic/remote/led/green" -F "%t %p" | while read -r payload
     do
         # Extract data from package
         topic=$(echo "$payload" | cut -d ' ' -f 1)
@@ -32,15 +32,15 @@ do
 
         # Send HTTP GET request
         case $topic in
-            "$base_topic/remote/ledRed")
+            "plant/$base_topic/remote/led/red")
                 curl "http://10.42.0.2/led/red/$msg"
                 ;;
             
-            "$base_topic/remote/ledYellow")
+            "plant/$base_topic/remote/led/yellow")
                 curl "http://10.42.0.2/led/yellow/$msg"
                 ;;
             
-            "$base_topic/remote/ledGreen")
+            "plant/$base_topic/remote/led/green")
                 curl "http://10.42.0.2/led/green/$msg"
                 ;;
         esac

@@ -11,7 +11,7 @@
 base_topic=$1
 dev=$2
 
-if [ $base_topic="help" ]
+if [ "$base_topic" = "help" ]
 then
     echo "mqtt_serial_write [plant id] [device location]"
     exit 0
@@ -53,7 +53,7 @@ do
         esac
 
         # Send pump signal
-        if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm=1 ] && [ $plantAlarm=0 ]
+        if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm = 1 ] && [ $plantAlarm = 0 ]
         then
             echo "p" > $dev
         done

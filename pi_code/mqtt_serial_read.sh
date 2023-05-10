@@ -14,7 +14,7 @@
 base_topic=$1
 dev=$2
 
-if [ $base_topic="help" ]
+if [ "$base_topic" = "help" ]
 then
 	echo "mqtt_serial_read [plant id] [device location]"
 	exit 0

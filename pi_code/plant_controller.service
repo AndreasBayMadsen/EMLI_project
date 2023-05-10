@@ -1,0 +1,14 @@
+[Unit]
+Description=Plant Water Service
+After=mosquitto.service
+
+
+[Service]
+ExecStart=+/usr/local/planter/spinup.sh -D FOREGROUND -k start
+Type=notify
+Restart=always
+
+
+[Install]
+WantedBy=default.target
+RequiredBy=network.target

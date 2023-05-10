@@ -9,12 +9,25 @@
 
 # Topic registration
 base_topic=$1
+dev=$2
+
+if [ $base_topic="help" ]
+then
+    echo "mqtt_serial_write [plant id] [device location]"
+    exit 0
+fi
 
 if [ -z "$base_topic" ]
 then 
     echo "Error:Base topic needs to be defined" 
     exit 64
 fi 
+
+if [ -z "$dev" ]
+then
+    echo "Error: An I/O device needs to be specified!"
+    exit 32
+fi
 
 
 # Main loop
@@ -40,9 +53,9 @@ do
         esac
 
         # Send pump signal
-        if [ -e /dev/ttyACM0 ] && [ $pumpControl = 1 ] && [ $pumpAlarm=1 ] && [ $plantAlarm=0 ]
+        if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm=1 ] && [ $plantAlarm=0 ]
         then
-            echo "p" > /dev/ttyACM0
+            echo "p" > $dev
         done
 done
 

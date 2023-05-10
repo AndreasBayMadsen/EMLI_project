@@ -12,6 +12,13 @@
 
 # Extract command line arguments
 base_topic=$1
+remote_ip=$2
+
+if [ $base_topic="help" ]
+then
+    echo "mqtt_http_read [plant id] [remote ip]"
+    exit 0
+fi
 
 if [ -z "$base_topic" ]
 then
@@ -19,10 +26,16 @@ then
     exit 64
 fi
 
+if [ -z "$remote_ip" ]
+then
+    echo "Error: An needs to be specified for the remote!"
+    exit 32
+fi
+
 # Read from ESP and present on MQTT
 while true
 do
-    button_presses=$(curl -s "http://10.42.0.2/button/a/count")
+    button_presses=$(curl -s "http://$remote_ip/button/a/count")
     mosquitto_pub -t "plant/$base_topic/remote/button" -m $button_presses
     sleep 2
 done

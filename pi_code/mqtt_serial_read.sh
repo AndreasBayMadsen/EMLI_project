@@ -12,12 +12,25 @@
 
 # Topic registration
 base_topic=$1
+dev=$2
+
+if [ $base_topic="help" ]
+then
+	echo "mqtt_serial_read [plant id] [device location]"
+	exit 0
+fi
 
 if [ -z "$base_topic" ]
 then 
     echo "Error:Base topic needs to be defined" 
     exit 64
 fi 
+
+if [ -z "$dev" ]
+then
+    echo "Error: An I/O device needs to be specified!"
+    exit 32
+fi
 
 IFS=','
 while read -ra line
@@ -32,5 +45,5 @@ do
 
 	fi
 	
-done < /dev/ttyACM0
+done < $dev
 

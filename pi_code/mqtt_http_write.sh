@@ -14,11 +14,24 @@
 
 # Extract command line arguments
 base_topic=$1
+remote_ip=$2
+
+if [ $base_topic="help" ]
+then
+    echo "mqtt_http_write [plant id] [remote ip]"
+    exit 0
+fi
 
 if [ -z "$base_topic" ]
 then
     echo "Error: A base topic must be specified!"
     exit 64
+fi
+
+if [ -z "$remote_ip" ]
+then
+    echo "Error: An needs to be specified for the remote!"
+    exit 32
 fi
 
 # Listen for 'PI --> ESP' messages
@@ -33,15 +46,15 @@ do
         # Send HTTP GET request
         case $topic in
             "plant/$base_topic/remote/led/red")
-                curl "http://10.42.0.2/led/red/$msg"
+                curl "http://$remote_ip/led/red/$msg"
                 ;;
             
             "plant/$base_topic/remote/led/yellow")
-                curl "http://10.42.0.2/led/yellow/$msg"
+                curl "http://$remote_ip/led/yellow/$msg"
                 ;;
             
             "plant/$base_topic/remote/led/green")
-                curl "http://10.42.0.2/led/green/$msg"
+                curl "http://$remote_ip/led/green/$msg"
                 ;;
         esac
     done

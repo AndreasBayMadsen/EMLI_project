@@ -14,7 +14,7 @@
 base_topic=$1
 remote_ip=$2
 
-if [ $base_topic="help" ]
+if [ "$base_topic" = "help" ]
 then
     echo "mqtt_http_read [plant id] [remote ip]"
     exit 0

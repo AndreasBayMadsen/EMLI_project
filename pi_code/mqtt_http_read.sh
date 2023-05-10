@@ -28,7 +28,7 @@ fi
 
 if [ -z "$remote_ip" ]
 then
-    echo "Error: An needs to be specified for the remote!"
+    echo "Error: An IP address needs to be specified for the remote!"
     exit 33
 fi
 

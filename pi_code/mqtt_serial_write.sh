@@ -19,7 +19,7 @@ fi
 
 if [ -z "$base_topic" ]
 then 
-    echo "Error:Base topic needs to be defined" 
+    echo "Error: Base topic needs to be defined" 
     exit 64
 fi 
 
@@ -31,11 +31,30 @@ fi
 
 
 # Main loop
-mosquitto_sub -t "plant/$base_topic/remote/led/red" -t "plant/$base_topic/remote/led/yellow" -t "plant/$base_topic/remote/led/green" -F "%t %p" | while read -r payload
+mosquitto_sub -t "plant/$base_topic/alarm/plant" -t "plant/$base_topic/alarm/pump" -t "plant/$base_topic/control/pump" -F "%t %p" | while read -r payload
 do
+    # Allow no variables to be empty
+    if [ -z $plantAlarm ]
+    then
+        plantAlarm=1
+    fi
+
+    if [ -z $pumpAlarm ]
+    then
+        pumpAlarm=0
+    fi
+
+    if [ -z $pumpControl ]
+    then
+        pumpControl=0
+    fi
+
     # Extract data from package
         topic=$(echo "$payload" | cut -d ' ' -f 1)
         msg=$(echo "$payload" | cut -d ' ' -f 2-)
+
+        # Reset pump control
+        pumpControl=0
 
         # Distribute values to variables
         case $topic in
@@ -56,6 +75,6 @@ do
         if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm = 1 ] && [ $plantAlarm = 0 ]
         then
             echo "p" > $dev
-        done
+        fi
 done
 

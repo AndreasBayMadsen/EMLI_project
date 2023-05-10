@@ -22,7 +22,7 @@ fi
 
 if [ -z "$base_topic" ]
 then 
-    echo "Error:Base topic needs to be defined" 
+    echo "Error: Base topic needs to be defined" 
     exit 64
 fi 
 

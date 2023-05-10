@@ -45,5 +45,5 @@ do
                 ;;
         esac
     done
-    sleep 10
+    sleep 1
 done

@@ -31,7 +31,7 @@ fi
 if [ -z "$remote_ip" ]
 then
     echo "Error: An needs to be specified for the remote!"
-    exit 32
+    exit 33
 fi
 
 # Listen for 'PI --> ESP' messages

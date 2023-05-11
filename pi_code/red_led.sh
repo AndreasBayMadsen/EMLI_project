@@ -39,10 +39,9 @@ do
         if [ $PumpAlarm -eq 0 ] || [ $PlantAlarm -eq 1 ] 
         then 
                 mosquitto_pub -t plant/$base_topic/remote/led/red -m  on
-                echo " ALARM!!! Ring til mor!"
+                echo " ALARM!!! Ring til mor!. $(date)"
         else 
                 mosquitto_pub -t plant/$base_topic/remote/led/red -m  off
-                echo " drift ok " 
 
         fi
 

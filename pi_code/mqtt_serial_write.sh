@@ -57,23 +57,27 @@ do
         pumpControl=0
 
         # Distribute values to variables
-        case $topic in
-            "plant/$base_topic/alarm/plant")
-                plantAlarm=$msg
-                ;;
-            
-            "plant/$base_topic/alarm/pump")
-                pumpAlarm=$msg
-                ;;
-            
-            "plant/$base_topic/control/pump")
-                pumpControl=$msg
-                ;;
-        esac
+        if [ $msg=1 ] | [ $msg=0 ]
+        then
+            case $topic in
+                "plant/$base_topic/alarm/plant")
+                    plantAlarm=$msg
+                    ;;
+                
+                "plant/$base_topic/alarm/pump")
+                    pumpAlarm=$msg
+                    ;;
+                
+                "plant/$base_topic/control/pump")
+                    pumpControl=$msg
+                    ;;
+            esac
+        fi
 
         # Send pump signal
         if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm = 1 ] && [ $plantAlarm = 0 ]
         then
+            echo "Pumping water $(date)"
             echo "p" > $dev
         fi
 done

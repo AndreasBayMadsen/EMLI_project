@@ -32,10 +32,10 @@ do
 
 	if [ $message = "on" ]
 	then 
-		mosquitto_pub -t plant/1/remote/led/yellow -m  "on"
+		mosquitto_pub -t plant/$base_topic/remote/led/yellow -m  "on"
 			echo " Moisture below Threshold"
 	else 
-		mosquitto_pub -t plant/1/remote/led/yellow -m  "off"
+		mosquitto_pub -t plant/$base_topic/remote/led/yellow -m  "off"
 		echo " moisture ok "
 	fi
 

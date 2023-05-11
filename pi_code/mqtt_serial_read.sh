@@ -35,14 +35,18 @@ fi
 IFS=','
 while read -ra line
 do
-	if [ ${line[0]}=1 ] | [ ${line[0]}=0 ]
+	if [ ! -z ${line[0]} ]
 	then
-		mosquitto_pub -m "${line[0]}" -t "plant/$base_topic/alarm/plant"
-		mosquitto_pub -m "${line[1]}" -t "plant/$base_topic/alarm/pump"
-		mosquitto_pub -m "${line[2]}" -t "plant/$base_topic/sensor/moisture"
-		mosquitto_pub -m "${line[3]}" -t "plant/$base_topic/sensor/light"
+		if [ ${line[0]}=1 ] || [ ${line[0]}=0 ]
+		then
+
+			mosquitto_pub -m "${line[0]}" -t "plant/$base_topic/alarm/plant"
+			mosquitto_pub -m "${line[1]}" -t "plant/$base_topic/alarm/pump"
+			mosquitto_pub -m "${line[2]}" -t "plant/$base_topic/sensor/moisture"
+			mosquitto_pub -m "${line[3]}" -t "plant/$base_topic/sensor/light"
 
 
+		fi
 	fi
 	
 done < $dev

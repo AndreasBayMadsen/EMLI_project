@@ -89,6 +89,10 @@ do
         PID_plant_array+=($buffer)	# makes vector of process ids
 done
 
+# Start up monitoring process
+nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
+monitor_PID=$!
+
 # Monitor running processes
 scriptCount=${#PID_plant_array[@]}      # Number of scripts per plant
 while :
@@ -123,12 +127,14 @@ do
                         fi
                 done  
         done
-        # echo "Checking Monitor script"
-        # if ! ps -p $monitor_PID > /dev/null
-        # then
-        #         ./logging/system_monitor.sh &
-        #         monitor_PID=$!
-        # fi
+        echo "Checking Monitor script"
+        if ! ps -p $monitor_PID > /dev/null
+        then
+                echo "Monitor script stopped!"
+                echo "Restarting monitor script"
+                nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
+                monitor_PID=$!
+        fi
         echo "Sleeping for 10s"
         sleep 10
 done

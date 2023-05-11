@@ -1,0 +1,4 @@
+Error: -m argument given but no message specified.
+
+
+Use 'mosquitto_pub --help' to see usage.

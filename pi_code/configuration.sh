@@ -5,10 +5,10 @@
 #***********************************************
 
 # Setup for the various radish plants
-N_RADISHES=1
-REMOTE_IPS=(
+N_RADISHES=1            # Number of radishes
+REMOTE_IPS=(            # IP for each remote
     "10.42.0.2"
 )
-CONTROLLER_SERIALS=(
+CONTROLLER_SERIALS=(    # Serial device for each radish
     "/dev/ttyACM0"
 )

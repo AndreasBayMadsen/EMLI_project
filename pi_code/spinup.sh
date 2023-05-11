@@ -5,10 +5,11 @@
 
 #....................... 
 
-# Get constants and configurations
+# ---------- INCLUDES ---------- #
 source configuration.sh
 
-#--- functions to starts the scripts per plant ---
+# ---------- FUNCTION DECLARATIONS ---------- #
+# Function to start all the sub-scripts for a single plant
 function start_scripts {
         # define names of cmd line inputs
         plant_id=$1    #  plant id  is the index of the for loop
@@ -22,7 +23,7 @@ function start_scripts {
                 exit 64
         fi
 
-        # start scripts and give inputs and save process id
+        # Start scripts, give inputs and save process IDs
         nohup ./mqtt_serial_read.sh $plant_id $serial_dev &>./logs/mqtt_serial_read_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
@@ -43,32 +44,32 @@ function start_scripts {
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./button_water.sh $plant_id &>./logs/button_water_$plant_id.log &
+        nohup ./button_water.sh $plant_id &>./logs/button_water_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./moisture_controller.sh $plant_id &>./logs/moisture_controller_$plant_id.log &
+        nohup ./moisture_controller.sh $plant_id &>./logs/moisture_controller_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./moisture_alarm.sh $plant_id &>./logs/moisture_alarm_$plant_id.log &
+        nohup ./moisture_alarm.sh $plant_id &>./logs/moisture_alarm_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./green_led.sh $plant_id &>./logs/green_led_$plant_id.log &
+        nohup ./green_led.sh $plant_id &>./logs/green_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./yellow_led.sh $plant_id &>./logs/yellow_led_$plant_id.log &
+        nohup ./yellow_led.sh $plant_id &>./logs/yellow_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        ./red_led.sh $plant_id &>./logs/red_led_$plant_id.log &
+        nohup ./red_led.sh $plant_id &>./logs/red_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
@@ -77,44 +78,43 @@ function start_scripts {
 
 }
 
-# --- MAIN PROGRAM --- #
+# ---------- MAIN PROGRAM ---------- #
 # Bootup procedure
 nmcli d wifi hotspot ifname wlan0 ssid EMLI_TEAM_12 password raspberry
 
 # Start up all processes
 for(( i=0 ; i< N_RADISHES; i++ )) 
 do
-        buffer=$(start_scripts $i )     # reads output array of script function with process ids
+        buffer=$(start_scripts $i)      # reads output array of script function with process ids
         PID_plant_array+=($buffer)	# makes vector of process ids
-
 done
-exit
-echo "Bad"
 
 # Monitor running processes
+scriptCount=${#PID_plant_array[@]}      # Number of scripts per plant
 while :
 do
-        for (( i = 0; i < N_RADISES; i++ ))
+        for (( i = 0; i < N_RADISHES; i++ ))
         do
                 for (( j = 0; j < scriptCount; j++ ))
                 do
-                        let n=$i*2+$j
-                        if ! ps -p ${PID[n]} > /dev/null
+                        let n=$i*$scriptCount+$j        # 1D-index of the script in question
+                        if ! ps -p ${PID_plant_array[n]} > /dev/null
                         then
                                 echo "Plant $i scripts have failed at script $j"
                                 echo "Killing all applicaple plant scripts"
                                 for (( k = 0; k < scriptCount; k++ ))
                                 do
-                                        let n=$i*2+$k
-                                        #kill ${PID[n]}
-                                        echo "kill PID ${PID[n]}"
+                                        let n=$i*$scriptCount+$k
+                                        echo "kill PID ${PID_plant_array[n]}"
+                                        kill ${PID_plant_array[n]}
                                 done
+                                
                                 echo "Restarting scripts"
-                                #temp_pid=($(start_scripts(i)))
+                                temp_pid=($(start_scripts $i))
                                 for (( k = 0; k < scriptCount; k++ ))
                                 do
-                                        let n=$i*2+$k
-                                        PID[n]=${temp_pid[k]}
+                                        let n=$i*scriptCount+$k
+                                        PID_plant_array[n]=${temp_pid[k]}
                                 done
                                 echo "Restart done"
 
@@ -123,12 +123,12 @@ do
                         fi
                 done  
         done
-        echo "Checking Monitor script"
-        if ! ps -p $monitor_PID > /dev/null
-        then
-                ./logging/system_monitor.sh &
-                monitor_PID=$!
-        fi
+        # echo "Checking Monitor script"
+        # if ! ps -p $monitor_PID > /dev/null
+        # then
+        #         ./logging/system_monitor.sh &
+        #         monitor_PID=$!
+        # fi
         echo "Sleeping for 10s"
         sleep 10
 done

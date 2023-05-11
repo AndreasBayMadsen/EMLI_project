@@ -5,8 +5,8 @@
 #***********************************************
 
 # Read from '/proc/net/dev'
-eth0_line=($(cat /proc/net/dev | grep "enp5s0"))
-wlan0_line=($(cat /proc/net/dev | grep "wlp4s0"))
+eth0_line=($(cat /proc/net/dev | grep "eth0"))
+wlan0_line=($(cat /proc/net/dev | grep "wlan0"))
 
 # Extract bytes sent/received
 eth0_rx=${eth0_line[1]}

@@ -6,7 +6,7 @@
 # Try to connect to '1.1.1.1'
 if nc -zw1 "1.1.1.1" 443
 then
-    echo "1"
+    exit 0
 else
-    echo "0"
+    exit 1
 fi

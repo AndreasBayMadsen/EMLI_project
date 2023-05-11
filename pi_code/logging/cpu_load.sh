@@ -5,11 +5,12 @@
 #***********************************************
 
 # Read data from 'top'
-data=$(top -bn1 | grep "Cpu")
-data=($data)
+data=($(top -bn1 | grep "Cpu"))
+
+
 
 # Find percentage of time spent idle/not idle
-idle_perc=${data[7]}
-load_perc=$(bc <<< "scale=2; 100-$idle_perc")
+idle_perc=$(echo ${data[7]} | tr . ,)
+let load_perc=100-$idle_perc
 
 echo $load_perc

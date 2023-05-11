@@ -13,7 +13,7 @@ total=${data[1]}
 available=${data[2]}
 
 # Calculate available percentage
-res=$(bc <<< "scale=2; $available/$total*100")
+res=$(bc <<< "scale=0; $available*100/$total")
 
 # Return result
 echo $res

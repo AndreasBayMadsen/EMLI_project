@@ -72,3 +72,78 @@ buffer=$(start_scripts $i )     # reads output array of script function with pro
 PID_plant_array+=($buffer)	# makes vector of process ids
 
 done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+while :
+do
+        for (( i = 0; i < N_RADISES; i++ ))
+        do
+                for (( j = 0; j < scriptCount; j++ ))
+                do
+                        let n=$i*2+$j
+                        if ! ps -p ${PID[n]} > /dev/null
+                        then
+                                echo "Plant $i scripts have failed at script $j"
+                                echo "Killing all applicaple plant scripts"
+                                for (( k = 0; k < scriptCount; k++ ))
+                                do
+                                        let n=$i*2+$k
+                                        #kill ${PID[n]}
+                                        echo "kill PID ${PID[n]}"
+                                done
+                                echo "Restarting scripts"
+                                #temp_pid=($(start_scripts(i)))
+                                for (( k = 0; k < scriptCount; k++ ))
+                                do
+                                        let n=$i*2+$k
+                                        PID[n]=${temp_pid[k]}
+                                done
+                                echo "Restart done"
+
+                        else
+                                echo "PID ${PID[n]} good"
+                        fi
+                done  
+        done
+        echo "Checking Monitor script"
+        if ! ps -p $monitor_PID > /dev/null
+        then
+                ./logging/system_monitor.sh &
+                monitor_PID=$!
+        fi
+        echo "Sleeping for 10s"
+        sleep 10
+done

@@ -3,37 +3,72 @@
 #..............................
 # The script to start all scripts
 
-#.............................
+#....................... 
 
- 
+
+
+#--- functions to starts the scripts per plant ---
+
+function start_scripts {
+
+
+
 # define names of cmd line inputs
-#plant_id=$1    #  plant id  is the index of the for loop
-#serial_dev=$2
-#remote_ip=$3
+plant_id=$1    #  plant id  is the index of the for loop
+serial_dev=${CONTROLLER_SERIAL[plant_id]}  # reads from the config array
+remote_ip=${REMOTE_IPS[plant_id]}
 
 # check inputs
-if [ -z "$serial_dev" ] || [ -z "$remote_ip" ]
+if [ -z "$plant_id" ] || [ -z "$serial_dev" ] || [ -z "$remote_ip" ]
 then 
-        echo "Error: Serial Device or remote ip  needs to be defined" 
+        echo "Error: plant id or Serial Device or remote ip  needs to be defined" 
         exit 64
 fi 
 
-for(( i=1 ; i< N_RADISES+1; i++ )) 
 
 
-# start scripts and give inputs
-./mqtt_serial_read $i $serial_dev &
-PID_ser_read($i)=$!
-./mqtt_serial_write.sh $i $serial_dev &
-PID_ser_write($i)=$!
-./mqtt_http_read.sh $i $i &
-PID_http_read($i)=$!
-./mqtt_http_write.sh  $plant_id $remote_ip
-./button_water.sh $plant_id 
-./moisture_controller.sh $plant_id
-./moisture_alarm.sh $plant_id
-./green_led.sh $plant_id
-./yellow_led.sh $plant_id
+# start scripts and give inputs and save process id
+./mqtt_serial_read $plant_id $serial_dev & 
+PID_plant+=($!)				# save process id in array 
+
+./mqtt_serial_write.sh $plant_id $serial_dev &
+PID_plant+=($!)
+
+./mqtt_http_read.sh $plant_id $remote_ip &
+PID_plant+=($!)
+
+./mqtt_http_write.sh $plant_id $remote_ip &
+PID_plant+=($!)
+
+./button_water.sh $plant_id &
+PID_plant+=($!)
+
+./moisture_controller.sh $plant_id &
+PID_plant+=($!)
+
+./moisture_alarm.sh $pant_id &
+PID_plant+=($!)
+
+./green_led.sh $plant_id &
+PID_plant+=($!)
+
+./yellow_led.sh $plant_id &
+PID_plant+=($!)
+
 ./red_led.sh $plant_id
+PID_plant+=($!)
+
+echo ${PID_plant[*]}
+
+}
+
+
+for(( i=0 ; i< N_RADISES; i++ )) 
+
+do
+
+
+buffer=$(start_scripts $i )     # reads output array of script function with process ids
+PID_plant_array+=($buffer)	# makes vector of process ids
 
 done

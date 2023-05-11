@@ -8,54 +8,54 @@ do
 
 	availableDisk=$(./available_disk.sh)
 	echo "-- Available disk space: $availableDisk% "
-	mosquitto_pub -m $availableDisk -t "system/availableDisk"
+	mosquitto_pub -m $availableDisk -t "/system/availableDisk"
 
 	availableRam=$(./available_ram.sh)
 	echo "-- Available RAM space: $availableRam%"
-	mosquitto_pub -m $availableRam -t "system/availableRam"
+	mosquitto_pub -m $availableRam -t "/system/availableRam"
 
 	CPULoad=$(./cpu_load.sh)
 	echo "-- CPU load: $CPULoad%"
-	mosquitto_pub -m $CPULoad -t "system/cpuLoad"
+	mosquitto_pub -m $CPULoad -t "/system/cpuLoad"
 
 	CPUTemp=$(./available_ram.sh)
 	echo "-- CPU temperature: $CPUTemp °C "
-	mosquitto_pub -m $CPUTemp -t "system/cpuTemp"
+	mosquitto_pub -m $CPUTemp -t "/system/cpuTemp"
 
 	if ./internet_connection.sh 
 	then
 		echo "-- Internet is available"
-		mosquitto_pub -m "connected" -t "system/internet"
+		mosquitto_pub -m "connected" -t "/system/internet"
 	else
 		echo "-- Internet is disconnected"
-		mosquitto_pub -m "disconnected" -t "system/internet"
+		mosquitto_pub -m "disconnected" -t "/system/internet"
 	fi
 	networkStatistics=($(./network_performance.sh))
 
 
 	echo "-- eth0:"
 	echo "  - Bytes recieved: ${networkStatistics[2]}"
-	mosquitto_pub -m ${networkStatistics[2]} -t "system/eth0RxBytes"
+	mosquitto_pub -m ${networkStatistics[2]} -t "/system/eth0RxBytes"
 	echo "  - Bytes sent: ${networkStatistics[5]}"
-	mosquitto_pub -m ${networkStatistics[5]} -t "system/eth0TxBytes"
+	mosquitto_pub -m ${networkStatistics[5]} -t "/system/eth0TxBytes"
 	uploadSpeedEth=$(echo "scale = 0; (${networkStatistics[2]} - ${networkStatisticsLast[2]}) / 5" | bc)
 	echo "  - Upload speed: $uploadSpeedEth B/s"
-	mosquitto_pub -m $uploadSpeedEth -t "system/eth0RxSpeed"
+	mosquitto_pub -m $uploadSpeedEth -t "/system/eth0RxSpeed"
 	downloadSpeedEth=$(echo "scale = 0; (${networkStatistics[5]} - ${networkStatisticsLast[5]}) / 5 " | bc)
 	echo "  - Download speed: $downloadSpeedEth B/s"
-	mosquitto_pub -m $downloadSpeedEth -t "system/eth0TxSpeed"
+	mosquitto_pub -m $downloadSpeedEth -t "/system/eth0TxSpeed"
 
 	echo "-- wlan0:"
 	echo "  - Bytes recieved: ${networkStatistics[8]}"
-	mosquitto_pub -m ${networkStatistics[8]} -t "system/wlan0RxBytes"
+	mosquitto_pub -m ${networkStatistics[8]} -t "/system/wlan0RxBytes"
 	echo "  - Bytes sent: ${networkStatistics[11]}"
-	mosquitto_pub -m ${networkStatistics[11]} -t "system/wlan0TxBytes"
+	mosquitto_pub -m ${networkStatistics[11]} -t "/system/wlan0TxBytes"
 	uploadSpeedWlan=$(echo "scale = 0; (${networkStatistics[8]} - ${networkStatisticsLast[8]}) / 5 " | bc)
 	echo "  - Upload speed: $uploadSpeedWlan B/s"
-	mosquitto_pub -m $uploadSpeedWlan -t "system/wlan0RxSpeed"
+	mosquitto_pub -m $uploadSpeedWlan -t "/system/wlan0RxSpeed"
 	downloadSpeedWlan=$(echo "scale = 0; (${networkStatistics[11]} - ${networkStatisticsLast[11]}) / 5 " | bc)
 	echo "  - Download speed: $downloadSpeedWlan B/s"
-	mosquitto_pub -m $downloadSpeedWlan -t "system/wlan0TxSpeed"
+	mosquitto_pub -m $downloadSpeedWlan -t "/system/wlan0TxSpeed"
 
 	networkStatisticsLast=($(echo ${networkStatistics[*]}))
 

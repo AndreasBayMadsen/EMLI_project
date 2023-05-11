@@ -35,7 +35,7 @@ fi
 IFS=','
 while read -ra line
 do
-	if [ ! -z ${line[0]} ]
+	if [ ${line[0]}=1 ] | [ ${line[0]}=0 ]
 	then
 		mosquitto_pub -m "${line[0]}" -t "plant/$base_topic/alarm/plant"
 		mosquitto_pub -m "${line[1]}" -t "plant/$base_topic/alarm/pump"

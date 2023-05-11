@@ -4,7 +4,7 @@ After=mosquitto.service
 
 
 [Service]
-ExecStart=+/usr/local/planter/spinup.sh -D FOREGROUND -k start
+ExecStart=+/usr/local/planter/spinup.sh
 Type=notify
 Restart=always
 

@@ -1,0 +1,49 @@
+  GNU nano 6.2                              nft_pi_fw2.nft *                                      
+#!/usr/sbin/nft -f     
+
+# reads from this file
+# sets up a fw , rules in nf_tables
+# based on tables >> chains which have rules
+# different rules for  same chain possible
+# should ignore all incoming traffic but the remotes
+# ct relates to connection tracking 
+# established relates to that a connection was made from inside the network
+# related  has to do with the connection but not only the direct response ( data transfer ..)
+# dport is for incoming traffic , port is duplex on that port , sport is outgoing
+# https://www.youtube.com/watch?v=KePW2pw8W5w
+# https://www.youtube.com/watch?v=7riJkp5q1-M
+
+
+
+
+table inet base_filter {
+        # chain for input
+        chain sys_input {
+                # rules 
+                type filter hook input priority 0 
+                #policy drop  # used at the end to drop everything that is not an exception
+                ct state { established , related } accept  # from inside the system to write to leds
+
+                iifname lo accept                          # checks for loopback and accepts
+                # connection tracking
+                tcp dport 22 ct state new accept           # standard port for SSH
+		# accept communication with this ip address -- script to add more remotes..
+                tcp dport 80 ip saddr 10.42.0.2 ct state { new , established } accept   # standard HTTP port		# make script to add remotes ...
+                tcp dport 3000 ct state new accept      # who is 
+                # udp port
+                udp dport 53 nct state new accept       # DNS port needed for internet!
+                drop                                    # drop the rest
+
+        }
+        chain sys_output {
+                #type filter hook output priority 0
+                #policy drop
+                #ct state { established , related } accept
+
+                #tcp sport 80 ct state new accept 
+
+
+
+        }
+}
+

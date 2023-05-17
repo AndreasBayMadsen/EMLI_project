@@ -1,6 +1,6 @@
 [Unit]
 Description=Plant Water Service
-After=mosquitto.service
+After=multi-user.target network.target mosquitto.service
 
 
 [Service]
@@ -10,5 +10,3 @@ Restart=always
 
 
 [Install]
-WantedBy=default.target
-RequiredBy=network.target

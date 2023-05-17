@@ -81,6 +81,7 @@ function start_scripts {
 
 # ---------- MAIN PROGRAM ---------- #
 # Bootup procedure
+echo "Starting access point."
 nmcli d wifi hotspot ifname wlan0 ssid EMLI_TEAM_12 password raspberry
 
 # Start up all processes
@@ -93,6 +94,8 @@ done
 # Start up monitoring process
 sudo -u pi nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
 monitor_PID=$!
+
+systemd-notify --ready --status="started"
 
 # Monitor running processes
 scriptCount=${#PID_plant_array[@]}      # Number of scripts per plant
@@ -124,7 +127,7 @@ do
                                 echo "Restart done"
 
                         else
-                                echo "PID ${PID[n]} good"
+                               echo "PID ${PID[n]} good"
                         fi
                 done  
         done

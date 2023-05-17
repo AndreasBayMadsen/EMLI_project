@@ -79,6 +79,7 @@ do
         then
             echo "Pumping water $(date)"
             echo "p" > $dev
+	    mosquitto_pub -t "plant/$base_topic/control/pump_activations" -m 1
         fi
 done
 

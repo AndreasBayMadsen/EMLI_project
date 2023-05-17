@@ -1,5 +1,4 @@
-  GNU nano 6.2                              nft_pi_fw2.nft *                                      
-#!/usr/sbin/nft -f     
+#!/usr/sbin/nft -f
 
 # reads from this file
 # sets up a fw , rules in nf_tables
@@ -13,36 +12,20 @@
 # https://www.youtube.com/watch?v=KePW2pw8W5w
 # https://www.youtube.com/watch?v=7riJkp5q1-M
 
-
-
+flush ruleset
 
 table inet base_filter {
         # chain for input
         chain sys_input {
                 # rules 
-                type filter hook input priority 0 
-                #policy drop  # used at the end to drop everything that is not an exception
+                type filter hook input priority 0
                 ct state { established , related } accept  # from inside the system to write to leds
 
-                iifname lo accept                          # checks for loopback and accepts
+                iifname lo accept                       # checks for loopback (MQTT) and accepts
                 # connection tracking
-                tcp dport 22 ct state new accept           # standard port for SSH
-		# accept communication with this ip address -- script to add more remotes..
-                tcp dport 80 ip saddr 10.42.0.2 ct state { new , established } accept   # standard HTTP port		# make script to add remotes ...
-                tcp dport 3000 ct state new accept      # who is 
-                # udp port
-                udp dport 53 nct state new accept       # DNS port needed for internet!
+                tcp dport 22 ct state new accept        # standard port for SSH
+                tcp dport 3000 ct state new accept      # Grafana
                 drop                                    # drop the rest
-
-        }
-        chain sys_output {
-                #type filter hook output priority 0
-                #policy drop
-                #ct state { established , related } accept
-
-                #tcp sport 80 ct state new accept 
-
-
 
         }
 }

@@ -6,6 +6,7 @@
 #....................... 
 
 # ---------- INCLUDES ---------- #
+cd "$(dirname "$0")"	# Change directory
 source configuration.sh
 
 # ---------- FUNCTION DECLARATIONS ---------- #
@@ -34,42 +35,42 @@ function start_scripts {
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./mqtt_http_read.sh $plant_id $remote_ip &>./logs/mqtt_http_read_$plant_id.log &
+        sudo -u pi nohup ./mqtt_http_read.sh $plant_id $remote_ip &>./logs/mqtt_http_read_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./mqtt_http_write.sh $plant_id $remote_ip &>./logs/mqtt_http_write_$plant_id.log &
+        sudo -u pi nohup ./mqtt_http_write.sh $plant_id $remote_ip &>./logs/mqtt_http_write_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./button_water.sh $plant_id &>./logs/button_water_$plant_id.log &
+        sudo -u pi nohup ./button_water.sh $plant_id &>./logs/button_water_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./moisture_controller.sh $plant_id &>./logs/moisture_controller_$plant_id.log &
+        sudo -u pi nohup ./moisture_controller.sh $plant_id &>./logs/moisture_controller_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./moisture_alarm.sh $plant_id &>./logs/moisture_alarm_$plant_id.log &
+        sudo -u pi nohup ./moisture_alarm.sh $plant_id &>./logs/moisture_alarm_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./green_led.sh $plant_id &>./logs/green_led_$plant_id.log &
+        sudo -u pi nohup ./green_led.sh $plant_id &>./logs/green_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./yellow_led.sh $plant_id &>./logs/yellow_led_$plant_id.log &
+        sudo -u pi nohup ./yellow_led.sh $plant_id &>./logs/yellow_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
 
-        nohup ./red_led.sh $plant_id &>./logs/red_led_$plant_id.log &
+        sudo -u pi nohup ./red_led.sh $plant_id &>./logs/red_led_$plant_id.log &
         PID=$!
         echo $PID >> ./logs/PIDs.log
         PID_plant+=($PID)
@@ -90,7 +91,7 @@ do
 done
 
 # Start up monitoring process
-nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
+sudo -u pi nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
 monitor_PID=$!
 
 # Monitor running processes
@@ -132,7 +133,7 @@ do
         then
                 echo "Monitor script stopped!"
                 echo "Restarting monitor script"
-                nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
+                sudo -u pi nohup ./system_monitor/system_monitor.sh &>./logs/system_monitor.log &
                 monitor_PID=$!
         fi
         echo "Sleeping for 10s"

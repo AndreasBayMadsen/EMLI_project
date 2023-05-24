@@ -1,0 +1,34 @@
+system/
+	availableDisk
+	availableRam
+	cpuLoad
+	cpuTemp
+	internet
+	eth0RxBytes
+	eth0TxBytes
+	eth0RxSpeed
+	eth0TxSpeed
+	wlan0RxBytes
+	wlan0TxBytes
+	wlan0RxSpeed
+	wlan0TxSpeed
+plant/
+	#/
+		control/
+			pump
+		remote/
+			led/
+				green
+				yellow
+				red
+			control
+			button
+		alarm/
+			pump
+			plant
+			moisture
+		sensor/
+			moisture
+			light
+
+

@@ -50,36 +50,36 @@ do
     fi
 
     # Extract data from package
-        topic=$(echo "$payload" | cut -d ' ' -f 1)
-        msg=$(echo "$payload" | cut -d ' ' -f 2-)
+    topic=$(echo "$payload" | cut -d ' ' -f 1)
+    msg=$(echo "$payload" | cut -d ' ' -f 2-)
 
-        # Reset pump control
-        pumpControl=0
+    # Reset pump control
+    pumpControl=0
 
-        # Distribute values to variables
-        if [ $msg=1 ] | [ $msg=0 ]
-        then
-            case $topic in
-                "plant/$base_topic/alarm/plant")
-                    plantAlarm=$msg
-                    ;;
-                
-                "plant/$base_topic/alarm/pump")
-                    pumpAlarm=$msg
-                    ;;
-                
-                "plant/$base_topic/control/pump")
-                    pumpControl=$msg
-                    ;;
-            esac
-        fi
+    # Distribute values to variables
+    if [ $msg=1 ] | [ $msg=0 ]
+    then
+        case $topic in
+            "plant/$base_topic/alarm/plant")
+                plantAlarm=$msg
+                ;;
+            
+            "plant/$base_topic/alarm/pump")
+                pumpAlarm=$msg
+                ;;
+            
+            "plant/$base_topic/control/pump")
+                pumpControl=$msg
+                ;;
+        esac
+    fi
 
-        # Send pump signal
-        if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm = 1 ] && [ $plantAlarm = 0 ]
-        then
-            echo "Pumping water $(date)"
-            echo "p" > $dev
-	    mosquitto_pub -t "plant/$base_topic/control/pump_activations" -m 1
-        fi
+    # Send pump signal
+    if [ -e $dev ] && [ $pumpControl = 1 ] && [ $pumpAlarm = 1 ] && [ $plantAlarm = 0 ]
+    then
+       echo "Pumping water $(date)"
+       echo "p" > $dev
+	   mosquitto_pub -t "plant/$base_topic/control/pump_activations" -m 1
+    fi
 done
 

@@ -16,6 +16,7 @@ plant/
 	#/
 		control/
 			pump
+			pump_activations
 		remote/
 			led/
 				green

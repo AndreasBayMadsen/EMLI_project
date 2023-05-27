@@ -83,7 +83,7 @@ function start_scripts {
 # Bootup procedure
 echo "Starting access point."
 ./nft_pi_fwIP.nft               # Set up firewall
-nmcli d wifi hotspot ifname wlan0 ssid EMLI_TEAM_12 password raspberry
+nmcli d wifi hotspot ifname wlan0 ssid plant_waterer password "jidkjqwneouixu92i3mlkjb2k3oå0@@¡»ijo9ij4pod ojwoedijodijf"
 
 # Start up all processes
 for(( i=0 ; i< N_RADISHES; i++ )) 

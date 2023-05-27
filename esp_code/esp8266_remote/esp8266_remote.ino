@@ -18,8 +18,8 @@ volatile unsigned long count_prev_time;
 
 // Wifi
 #include <ESP8266WiFi.h>
-const char* WIFI_SSID = "EMLI_TEAM_12";
-const char* WIFI_PASSWORD = "raspberry";
+const char* WIFI_SSID = "plant_waterer";
+const char* WIFI_PASSWORD = "jidkjqwneouixu92i3mlkjb2k3oå0@@¡»ijo9ij4pod ojwoedijodijf";
 
 // Static IP address
 IPAddress IPaddress(10, 42, 0, 2);

@@ -22,7 +22,6 @@ plant/
 				green
 				yellow
 				red
-			control
 			button
 		alarm/
 			pump

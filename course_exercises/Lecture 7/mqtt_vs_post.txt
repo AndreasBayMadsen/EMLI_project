@@ -1,9 +1,0 @@
-In all cases, a value of 0 is sent.
-
-Number of bytes per transmission:
-MQTT: 57
-POST: 474
-
-Time spent per transmission:
-MQTT: 0.515 ms
-POST: 12 ms

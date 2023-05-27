@@ -4,12 +4,12 @@ This code implements an automated radish watering system.
 The target platform is a Raspberry Pi running a Debian-based OS (Ubuntu).
 
 ## Dependencies
--Mosquitto
--InfluxDB
--Telegraf
--Fail2ban
--nftables
--nmcli
+- Mosquitto
+- InfluxDB
+- Telegraf
+- Fail2ban
+- nftables
+- nmcli
 
 ## Install
 ```
@@ -21,6 +21,6 @@ sudo mv pi_code/logs /usr/local/planter/logs
 ```
     
 ## Additonally, for logging data:
--Create InfluxDB database
--Configure Telegraf
--Create Grafana dashboard
+- Create InfluxDB database
+- Configure Telegraf
+- Create Grafana dashboard

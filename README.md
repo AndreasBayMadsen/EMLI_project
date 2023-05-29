@@ -27,8 +27,23 @@ sudo mv pi_code/system_monitor /usr/local/planter/system_monitor
 ```
 sudo mv pi_code/logs /usr/local/planter/logs
 ```
-    
+```
+sudo mv pi_code/configuration_files/telegraf.conf /etc/telegraf/
+```
+```
+sudo mv pi_code/configuration_files/jail.local /etc/fail2ban/
+```
+   
 ## Additonally, for logging data:
 - Create InfluxDB database
-- Configure Telegraf
+    - Name: radish_waterer
+    - Create user 'telegraf' with password 'emli'
+    - Grant all rights to the database to the 'telegraf' user
+- Create Grafana data source
+    - Name: Radish waterer
+    - URL: http://localhost:8086
+    - Database: radish_waterer
+    - User: telegraf
+    - Password: emli
 - Create Grafana dashboard
+    - Import dashboard file: "pi_code/configuration_files/Radish waterer-1685382794843.json"
